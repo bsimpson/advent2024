@@ -1,8 +1,8 @@
 require "debug"
 
 # contents = "12345"
-contents = "2333133121414131402"
-# contents = File.read("./day_9.txt")
+# contents = "2333133121414131402"
+contents = File.read("./day_9.txt")
 contents = contents.split("")
 
 puts "contents"#, contents
@@ -11,13 +11,13 @@ blocks = []
 # 0..111....22222
 contents.each.with_index do |file_id, idx|
   if (idx % 2 != 0)
-    blocks.push "." * (file_id.to_i)
+    blocks.push ["."] * (file_id.to_i)
   else
-    blocks.push (idx / 2).to_s * file_id.to_i
+    blocks.push [(idx / 2).to_s] * file_id.to_i
   end
 end
 
-# blocks = blocks.flatten.join("").split("")
+blocks = blocks.flatten#.join("").split("")
 puts "blocks", blocks.inspect
 
 # 022111222......
@@ -30,21 +30,35 @@ puts "blocks", blocks.inspect
 #   blocks[last_char_pos] = "."
 # end
 
+# Faster but still doesn't work file id > 9
+# compacted = Array.new(blocks.length)
+# non_empty_blocks = blocks.select { |x| x != "." }
+# x = non_empty_blocks.length - 1
+# blocks.length.times do |idx|
+#   # debugger
+#   break if idx > x
+
+#   if blocks[idx] != "."
+#     compacted[idx] = blocks[idx]
+#   else
+#     compacted[idx] = non_empty_blocks.pop
+#   end
+# end
+
 compacted = Array.new(blocks.length)
-non_empty_blocks = blocks.select { |x| x != "." }
+non_empty_blocks = blocks.select { |x| x[0] != "." }
 x = non_empty_blocks.length - 1
 blocks.length.times do |idx|
   # debugger
   break if idx > x
 
-  if blocks[idx] != "."
+  if blocks[idx][0] != "."
     compacted[idx] = blocks[idx]
   else
     compacted[idx] = non_empty_blocks.pop
   end
 end
-
-puts "compacted"#, compacted
+puts "compacted", compacted.inspect
 
 # sum = 0
 # blocks.each do |n|
@@ -57,8 +71,6 @@ puts "compacted"#, compacted
 #   sum += n.to_i
 # end
 # puts sum
-
-puts blocks.length == compacted.length
 
 sum = 0
 compacted.each_with_index do |n, idx|
