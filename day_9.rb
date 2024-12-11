@@ -17,6 +17,8 @@ contents.each.with_index do |file_id, idx|
   end
 end
 
+part2_blocks = blocks
+
 blocks = blocks.flatten#.join("").split("")
 puts "blocks", blocks.inspect
 
@@ -80,3 +82,63 @@ end
 
 puts "checksum", sum
 # 89947706548 too low
+
+# PART 2
+blocks = part2_blocks
+compacted = blocks
+# non_empty_blocks = blocks.select { |x| x[0] != "." }
+# x = non_empty_blocks.length - 1
+# blocks.each.with_index do |block, idx|
+#   debugger
+
+#   if block.any? {|x| == "." }
+#     if (a = blocks[blocks.length - idx].length) <= b = block.length # 2222 <= ....
+#       c = blocks[blocks.length - idx].fill(".", a, b - a)
+#       compacted[idx] = c
+#     end
+#   else
+#     compacted[idx] = block
+#   end
+# end
+
+blocks.reverse.each.with_index do |block, idx|
+
+  next if block.empty? || block.all? {|x| x == "." }
+
+  # leftmost span of free space blocks that could fit the file
+  c_idx = compacted.index {|x| x.select {|xx| xx == "." }.length >= block.length }
+
+
+  if c_idx
+    # debugger
+    # no free placement to the left of the current index
+    next if c_idx > compacted.length - 1 - idx
+
+    mutable_block = block.dup
+    new_block = compacted[c_idx].map.with_index do |c, ii|
+      # take char from destination block
+      if c != "."
+        c
+      # fill in with source block
+      elsif mutable_block.length > 0
+        mutable_block.shift
+      else
+        # fill in remaining destination space
+        "."
+      end
+    end
+    compacted[c_idx] = new_block
+
+    compacted[compacted.length - 1 - idx].fill(".")
+  end
+end
+
+puts compacted.join("")
+
+sum = 0
+compacted.flatten.each_with_index do |n, idx|
+  next if n == 0
+  sum += n.to_i * idx
+end
+
+puts "checksum", sum
