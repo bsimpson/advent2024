@@ -18,6 +18,8 @@ Button B: X+27, Y+71
 Prize: X=18641, Y=10279
 CONTENTS
 
+contents = File.read("./day_13.txt")
+
 machines = contents.split("\n\n").map do |machine|
   lines = machine.split("\n")
   {
@@ -37,34 +39,42 @@ machines = contents.split("\n\n").map do |machine|
 end
 
 # puts machines.inspect
-# TODO remove slice - just for testing
-machines.slice(0, 1).each do |machine|
+costs = machines.map do |machine|
   x_set = []
   x = 0
   while x <= 100 do
     # combinations a and b
     xx = 100
     while xx >= x do
-      # debugger
-      # debugger if (x - xx) == 80 && xx == 40
-      # 5, 0
-      # 4, 1
-      # 3, 2
-      # 2, 3,
-      # 1, 4,
-      # # 0, 5
-      # puts "#{xx}, #{(xx - x)}"
-      # puts "#{(xx - x)}, #{xx}"
-      x_set << { val: (machine[:a][0] * xx) + (machine[:b][0] * (xx - x)), a: xx, b: (xx - x), cost: (xx * 3) + (xx -x) }
-      x_set << { val: (machine[:a][0] * (xx - x)) + (machine[:b][0] * xx), a: (xx - x), b: xx, cost: ((xx - x) * 3) + xx }
+      x_set << {
+        xval: (machine[:a][0] * xx) + (machine[:b][0] * (xx - x)),
+        yval: (machine[:a][1] * xx) + (machine[:b][1] * (xx - x)),
+        a: xx,
+        b: (xx - x),
+        cost: (xx * 3) + (xx -x)
+      }
+      x_set << {
+        xval: (machine[:a][0] * (xx - x)) + (machine[:b][0] * xx),
+        yval: (machine[:a][1] * (xx - x)) + (machine[:b][1] * xx),
+        a: (xx - x),
+        b: xx,
+        cost: ((xx - x) * 3) + xx
+      }
       xx -= 1
     end
-    # puts "--"
 
     x += 1
   end
 
-  puts x_set.select { |x| x[:val] == (machine[:prize][0]) }
-  puts x_set.length
+  valid_inputs = x_set.select { |x| x[:xval] == (machine[:prize][0]) && x[:yval] == (machine[:prize][1]) }
+  if valid_inputs.empty?
+    0
+  else
+    valid_inputs.min_by { |x| x[:cost] }[:cost]
+  end
 end
 
+puts costs.inspect
+
+# sum up all costs
+puts costs.inject(0, :+)
